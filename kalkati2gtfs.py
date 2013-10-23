@@ -13,25 +13,25 @@ import sys
 import xml.sax
 from xml.sax.handler import ContentHandler
 
-#from django.contrib.gis.geos import Point # needed for transformations
+from django.contrib.gis.geos import Point # needed for transformations
 
 timezone = "Europe/Helsinki"
 
 """
 Kalkati Transport modes
-1	air
-2	train
-21	long/mid distance train
-22	local train
-23	rapid transit
-3	metro
-4	tramway
-5	bus, coach
-6	ferry
-7	waterborne
-8	private vehicle
-9	walk
-10	other
+1   air
+2   train
+21  long/mid distance train
+22  local train
+23  rapid transit
+3   metro
+4   tramway
+5   bus, coach
+6   ferry
+7   waterborne
+8   private vehicle
+9   walk
+10  other
 
 GTFS Transport Modes
 0 - Tram, Streetcar, Light rail.
@@ -69,11 +69,11 @@ class KalkatiHandler(ContentHandler):
     calendar_fields = (u'service_id', u'monday', u'tuesday', u'wednesday',
             u'thursday', u'friday', u'saturday', u'sunday', u'start_date',
             u'end_date',)
-    
+
     route_count = 0
     service_count = 0
     routes = {}
-    
+
     synonym = False
     stop_sequence = None
     trip_id = None
@@ -82,7 +82,7 @@ class KalkatiHandler(ContentHandler):
     service_validities = None
     service_mode = None
     transmodes = {}
-    
+
     def __init__(self, gtfs_files):
         self.files = gtfs_files
         for name in gtfs_files:
@@ -90,20 +90,19 @@ class KalkatiHandler(ContentHandler):
 
     def write_values(self, name, values):
         self.files[name].write((u",".join(values) + u"\n").encode('utf-8'))
-        
+
     def add_stop(self, attrs):
-        #point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
-        #point.transform(4326) # WGS84
+        point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
+        point.transform(4326) # WGS84
         self.write_values("stops", (attrs['StationId'],
                 attrs.get('Name', "Unnamed").replace(",", " "),
-                attrs['X'], attrs['Y']))
-                #str(point.y), str(point.x)))
+                str(point.y), str(point.x)))
 
     def add_agency(self, attrs):
         self.write_values("agency", (attrs['CompanyId'],
                 attrs['Name'].replace(",", " "),
                 "http://example.com", timezone))  # can't know
-                
+
     def add_calendar(self, attrs):
         """This is the inaccurate part of the whole operation!
         This assumes that the footnote vector has a regular shape
@@ -132,7 +131,7 @@ class KalkatiHandler(ContentHandler):
         ed = str(end_date).replace("-", "")
         self.write_values("calendar", (service_id,) + tuple(weekdays) +
                 (fd, ed))
-        
+
     def add_stop_time(self, attrs):
         self.stop_sequence.append(attrs['StationId'])
         arrival_time = ":".join((attrs["Arrival"][:2],
@@ -144,21 +143,21 @@ class KalkatiHandler(ContentHandler):
             departure_time = arrival_time
         self.write_values("stop_times", (self.trip_id, arrival_time,
                 departure_time, attrs["StationId"], attrs["Ix"]))
-        
+
     def add_route(self, route_id):
         route_type = "3"  # fallback is bus
         if self.service_mode in self.transmodes:
             trans_mode = self.transmodes[self.service_mode]
             if trans_mode in KALKATI_MODE_TO_GTFS_MODE:
                 route_type = KALKATI_MODE_TO_GTFS_MODE[trans_mode]
-        
+
         self.write_values("routes", (route_id, self.route_agency_id,
                 "", self.route_name.replace(",", "."), route_type))
-                
+
     def add_trip(self, route_id):
         for service_id in self.service_validities:
             self.write_values("trips", (route_id, service_id, self.trip_id,))
-                
+
     def startElement(self, name, attrs):
         if not self.synonym and name == "Company":
             self.add_agency(attrs)
