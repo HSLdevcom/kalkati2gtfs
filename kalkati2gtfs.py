@@ -13,7 +13,7 @@ import sys
 import xml.sax
 from xml.sax.handler import ContentHandler
 
-from django.contrib.gis.geos import Point # needed for transformations
+#from django.contrib.gis.geos import Point # needed for transformations
 
 timezone = "Europe/Helsinki"
 
@@ -92,11 +92,12 @@ class KalkatiHandler(ContentHandler):
         self.files[name].write((u",".join(values) + u"\n").encode('utf-8'))
         
     def add_stop(self, attrs):
-        point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
-        point.transform(4326) # WGS84
+        #point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
+        #point.transform(4326) # WGS84
         self.write_values("stops", (attrs['StationId'],
                 attrs.get('Name', "Unnamed").replace(",", " "),
-                str(point.y), str(point.x)))
+                attrs['X'], attrs['Y']))
+                #str(point.y), str(point.x)))
 
     def add_agency(self, attrs):
         self.write_values("agency", (attrs['CompanyId'],

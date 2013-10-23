@@ -4,4 +4,4 @@ This converter converts kalkati to gtfs.
 
 ## Dependencies
 
-Django, geos.
+(Django, geos.)
