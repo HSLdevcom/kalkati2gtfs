@@ -95,7 +95,7 @@ class KalkatiHandler(ContentHandler):
         #point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
         #point.transform(4326) # WGS84
         self.write_values("stops", (attrs['StationId'],
-                attrs.get('Name', "Unnamed").replace(",", " "),
+                attrs.get('Name', "Unnamed").replace(",", " ")))
                 #str(point.y), str(point.x)))
 
     def add_agency(self, attrs):
