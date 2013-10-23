@@ -164,8 +164,8 @@ class KalkatiHandler(ContentHandler):
         elif not self.synonym and name == "Station":
             self.add_stop(attrs)
         elif not self.synonym and name == "Trnsmode":
-            if "Modetype" in attrs:
-                self.transmodes[attrs["TrnsmodeId"]] = attrs["Modetype"]
+            if "ModeType" in attrs:
+                self.transmodes[attrs["TrnsmodeId"]] = attrs["ModeType"]
         elif name == "Footnote":
             self.add_calendar(attrs)
         elif name == "Service":
