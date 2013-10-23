@@ -1,0 +1,965 @@
+<?xml version="1.0"?>
+<!-- $Revision: 1.2 $ -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<!-- ========================================================================
+   == Simple Types
+   -->
+	<xsd:simpleType name="cost_weight_factor_type">
+		<xsd:annotation>
+			<xsd:documentation>A cost weight factor may be used in Change elements to prefer or discourage some service changes over others.  A cost weight factor of 1.0 gives no preference</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:double">
+			<xsd:minExclusive value="0.0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="stop_type_type">
+		<xsd:annotation>
+			<xsd:documentation>The type of a service stop gives extra information about the stop</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="S">
+				<xsd:annotation>
+					<xsd:documentation>Start: A stop of this type is the first stop of a service</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="F">
+				<xsd:annotation>
+					<xsd:documentation>Final: A stop of this type is the final stop of a service</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="I">
+				<xsd:annotation>
+					<xsd:documentation>Interval: The service is scheduled to wait at a stop of this type for some time</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="C">
+				<xsd:annotation>
+					<xsd:documentation>Continuation: The service stops only momentarily at a stop of this type</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="P">
+				<xsd:annotation>
+					<xsd:documentation>Passing: The service does not stop at a stop of this type</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="hhmm">
+		<xsd:annotation>
+			<xsd:documentation>Time of day in hours and minutes in the format HHMM</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,4}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="trnsattrid_type">
+		<xsd:annotation>
+			<xsd:documentation>An identification number of a transport attribute.  Transport attribute IDs should be unique within the jp_database document they appear in</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="trnsmodeid_type">
+		<xsd:annotation>
+			<xsd:documentation>An identification number of a transport mode.  Transport mode IDs should be unique within the jp_database document they appear in</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="stationid_type">
+		<xsd:annotation>
+			<xsd:documentation>An identification string of a station.  Station IDs should be unique for each provider of time table information</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="countryid_type">
+		<xsd:annotation>
+			<xsd:documentation>An ISO3166 two character country code.  Country codes are unique globally</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="languageid_type">
+		<xsd:annotation>
+			<xsd:documentation>An ISO639 two character language code.  Langyage codes are unique globally</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="companyid_type">
+		<xsd:annotation>
+			<xsd:documentation>An identification number for companies.  Company IDs should be unique within the jp_database document they appear in</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:positiveInteger"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="order_number_type">
+		<xsd:annotation>
+			<xsd:documentation>The order number of a stop in a Service.  The first stop has order number 1.  As a special case, order number 0 is treated as 1 and ordernumber 999 is treated as the last stop in the service</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:nonNegativeInteger"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="footnoteid_type">
+		<xsd:annotation>
+			<xsd:documentation>Identification of a footnote (a set of dates).  Footnote IDs should be unique within the jp_database document they appear in</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:nonNegativeInteger"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="timezoneid_type">
+		<xsd:annotation>
+			<xsd:documentation>Identification of a time zone.  Time zone IDs should be unique within the jp_database document they appear in</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:nonNegativeInteger"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="serviceid_type">
+		<xsd:annotation>
+			<xsd:documentation>Identification number of a service.  Service IDs should be unique within the jp_database document they appear in</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:positiveInteger"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="bitstring">
+		<xsd:annotation>
+			<xsd:documentation>A string of 0s and 1s</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[01]*"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- ========================================================================
+   == Complex Types
+   -->
+	<xsd:complexType name="CountryType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that either define or refer to a country</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="CountryId" type="countryid_type" use="required">
+			<xsd:annotation>
+				<xsd:documentation>An ISO3166 two character country code</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>Name of the country for humans</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="LanguageType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that either define or refer to a language</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="LanguageId" type="languageid_type" use="required">
+			<xsd:annotation>
+				<xsd:documentation>An ISO639 two character language code</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Description" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>Description of the language</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="CompanyType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that either define or refer to a company</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="CompanyId" type="companyid_type" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The ID of this company</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>The name of the company</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="TrnsattrBaseType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that either define or refer to a transportation attribute</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="TrnsattrId" type="trnsattrid_type" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Identification of a transport attribute</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>Name of the attribute</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="TrnsmodeBaseType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that either define or refer to a transportation mode</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="TrnsmodeId" type="trnsmodeid_type" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Identification code of a transport mode</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>Name of the transport mode</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="StationBaseType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that either define or refer to a station</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="StationId" type="stationid_type" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Provider identification of the Station</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>Name of the station in the current default language</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="SubServiceType">
+		<xsd:annotation>
+			<xsd:documentation>Specifies a subinterval of a Service's stations</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="Firststop" type="order_number_type" default="1">
+			<xsd:annotation>
+				<xsd:documentation>The order number of the first stop in the subinterval of stops.  The first stop is always included in the subinterval</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="Laststop" type="order_number_type" default="999">
+			<xsd:annotation>
+				<xsd:documentation>The order number of last stop.  Whether the last stop is included in the subinterval or not depends on the type of the element</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="DatedSubServiceType">
+		<xsd:annotation>
+			<xsd:documentation>Specifies a subinterval of a Service's stations and a set of dates on which something happens on the subinterval</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="SubServiceType">
+				<xsd:attribute name="FootnoteId" type="footnoteid_type" use="required">
+					<xsd:annotation>
+						<xsd:documentation>Selects a set of dates by footnote</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ServiceStopType">
+		<xsd:annotation>
+			<xsd:documentation>Base type for elements that define or refer to a Station</xsd:documentation>
+		</xsd:annotation>
+	</xsd:complexType>
+	<!-- =======================================================================
+   == jp_database
+   -->
+	<xsd:element name="jp_database">
+		<xsd:annotation>
+			<xsd:documentation>Root element for time tables</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- 
+        Delivery 
+     -->
+				<xsd:element name="Delivery" minOccurs="1" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation>Gives the period of time over which the following time tables are valid and identifies the providing company.  Unless otherwise noted, the first date in a footnote vector is the date of the start of the delivery period</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="Description" type="xsd:string" use="optional">
+							<xsd:annotation>
+								<xsd:documentation>Description of the delivery period of the time tables</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="Firstday" type="xsd:dateTime" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The starting date and time of the delivery period</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="Lastday" type="xsd:dateTime" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The ending date and time of the delivery period</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="CompanyId" type="companyid_type" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The provider company of the time table data</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="Version" type="xsd:string" use="optional">
+							<xsd:annotation>
+								<xsd:documentation>The version string assigned by the provider company of these time tables</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Language
+      -->
+				<xsd:element name="Language" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a language</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:complexContent>
+							<xsd:extension base="LanguageType">
+								<xsd:attribute name="isDefault" type="xsd:boolean" default="false">
+									<xsd:annotation>
+										<xsd:documentation>If true, then all Name and Description elements are asujmed to be in this language.  Only one Language element may set this attribute to true</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+      Company 
+     -->
+				<xsd:element name="Company" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a time table provider or transport operator company</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:complexContent>
+							<xsd:extension base="CompanyType">
+								<xsd:attribute name="Code" type="xsd:string" use="required">
+									<xsd:annotation>
+										<xsd:documentation>The provider assigned code for this company</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="Time" type="hhmm" default="0000">
+									<xsd:annotation>
+										<xsd:documentation>The time of day when the date changes for this company.  This is purely informational and has no effect on how the time tables are interpreted</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+        Country 
+      -->
+				<xsd:element name="Country" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a country</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:complexContent>
+							<xsd:extension base="CountryType">
+								<xsd:attribute name="Inland" type="xsd:string" use="optional"/>
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+        Timezone 
+      -->
+				<xsd:element name="Timezone" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a time zone by giving the offsets from UTC for different non-overlapping periods</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="Period" minOccurs="1" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>Gives the offset from UTC for a time zone during a perdiod of time</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:attribute name="Difference" type="xsd:string" use="required">
+										<xsd:annotation>
+											<xsd:documentation>Difference from UTC in the format [+-]HH:MM</xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+									<xsd:attribute name="Firstday" type="xsd:dateTime" use="required">
+										<xsd:annotation>
+											<xsd:documentation>Start date and time in UTC of this time zone period</xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+									<xsd:attribute name="Lastday" type="xsd:dateTime" use="required">
+										<xsd:annotation>
+											<xsd:documentation>End date and time in UTC of this time zone period</xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+						<xsd:attribute name="TimezoneId" type="timezoneid_type" use="required">
+							<xsd:annotation>
+								<xsd:documentation>ID of the time zone to define</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Station
+      -->
+				<xsd:element name="Station" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a Station</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:complexContent>
+							<xsd:extension base="StationBaseType">
+								<xsd:attribute name="Minchangetime" type="xsd:nonNegativeInteger" default="0">
+									<xsd:annotation>
+										<xsd:documentation>The default minimum time in minutes used when changing vehicles at this stop</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="Maxchangetime" type="xsd:nonNegativeInteger" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>The default maximum time in minutes used when changing vehicles at this stop</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="CountryId" type="countryid_type" use="required">
+									<xsd:annotation>
+										<xsd:documentation>The country where this station is</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="TimezoneId" type="timezoneid_type" use="required">
+									<xsd:annotation>
+										<xsd:documentation>The time zone in effect at this location</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="X" type="xsd:double" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>The X coordinate of this station in database specific coordinates</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="Y" type="xsd:double" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>The Y coordinate of this station in database specific coordinates</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="GlobalID" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>A globally unique ID for this location (e.g. digistopid)</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="isVirtual" type="xsd:boolean" default="false">
+									<xsd:annotation>
+										<xsd:documentation>If true, then the station does not represent a real physical station, but a virtual station</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="Type" type="xsd:nonNegativeInteger" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>An alias for the isVirtual attribute.  If zero, then this station isn't virtual, otherwise it is.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="city_id" type="xsd:nonNegativeInteger" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>The identification number of the city or county where the station is located</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="stop_area" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>This attribute is used to group stations.  Stations with the same stop_area code belong to the same group</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Trnsattr
+      -->
+				<xsd:element name="Trnsattr" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a transportation attribute</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:complexContent>
+							<xsd:extension base="TrnsattrBaseType">
+								<xsd:attribute name="AttrType" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>The globally defined type of this attribute, as specified in the code pages of the database. (e.g. Trident transport type).  Specifying this allows different time table providers to communicate using a common code</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="Processcode" type="xsd:integer" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>Ignored.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<!--
+ 	<xsd:attribute name="userVisible" type="xsd:boolean" use="optional" default="false">
+	 <xsd:annotation>
+	  <xsd:documentation>Specifies whether this attribute should be visible to the user.</xsd:documentation>
+	 </xsd:annotation>
+	</xsd:attribute>
+  -->
+								<!--   <xsd:attribute name="Routable" type="xsd:boolean" default="false">
+ 	 <xsd:annotation>
+	  <xsd:documentation>Specifies whether demanding or prohibiting this attribute in routing requests is allowed</xsd:documentation>
+	 </xsd:annotation>
+        </xsd:attribute> -->
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Trnsmode
+      -->
+				<xsd:element name="Trnsmode" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Defines a mode of transportation (=vehicle kind)</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:complexContent>
+							<xsd:extension base="TrnsmodeBaseType">
+								<xsd:attribute name="ModeType" type="xsd:integer" use="optional">
+									<xsd:annotation>
+										<xsd:documentation>The globally defined type of this transportation mode as specified using the transportation mode codes of the database</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Synonym
+      -->
+				<xsd:element name="Synonym" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Gives names of things in another language</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="Language" minOccurs="0" maxOccurs="unbounded" type="LanguageType"/>
+							<xsd:element name="Company" minOccurs="0" maxOccurs="unbounded" type="CompanyType"/>
+							<xsd:element name="Country" minOccurs="0" maxOccurs="unbounded" type="CountryType"/>
+							<xsd:element name="Station" minOccurs="0" maxOccurs="unbounded" type="StationBaseType"/>
+							<xsd:element name="Trnsattr" minOccurs="0" maxOccurs="unbounded" type="TrnsattrBaseType"/>
+							<xsd:element name="Trnsmode" minOccurs="0" maxOccurs="unbounded" type="TrnsmodeBaseType"/>
+						</xsd:sequence>
+						<xsd:attribute name="LanguageId" use="required" type="languageid_type">
+							<xsd:annotation>
+								<xsd:documentation>Language in which the contained elements' names and descriptions are in</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Footnote
+      -->
+				<xsd:element name="Footnote" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>A set of dates as a bit string</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="FootnoteId" type="footnoteid_type" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The ID of this footnote</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="Vector" type="bitstring" use="required">
+							<xsd:annotation>
+								<xsd:documentation>A set of dates as a bit vector string of 0s and 1s.  The first bit corresponds to the date given by the Firstdate attribute, if the attribute is given, or the starting date of the delivery period</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="Firstdate" type="xsd:date" use="optional">
+							<xsd:annotation>
+								<xsd:documentation>The date of the first bit in the bit string</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Change
+      -->
+				<xsd:element name="Change" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>This element defines a possible change from the stop of one service to that of another</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="ServiceId1" type="serviceid_type" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The service id of the service from which the passenger changes</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="StopIx1" type="order_number_type" default="999">
+							<xsd:annotation>
+								<xsd:documentation>The order number of the stop in the first service from which the passenger changes</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="ServiceId2" type="serviceid_type" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The service id of the service to which the passenger changes</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="StopIx2" type="order_number_type" default="1">
+							<xsd:annotation>
+								<xsd:documentation>The order number of the stop in the second service to which the passenger changes</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="ChangeTime" type="xsd:nonNegativeInteger" default="0">
+							<xsd:annotation>
+								<xsd:documentation>The number of minutes that it takes to use this change</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="ChangeCost" type="cost_weight_factor_type" default="1.0">
+							<xsd:annotation>
+								<xsd:documentation>A positive weight factor that can be used to prefer or discourage this change</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="guaranteed" type="xsd:boolean" default="false">
+							<xsd:annotation>
+								<xsd:documentation>If the guaranteed flag is true then this change is marked as being guaranteed:  The passenger should be notified that the second service waits for the first service in case the latter is late</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="userVisible" type="xsd:boolean" default="false">
+							<xsd:annotation>
+								<xsd:documentation>If the userVisible flag is true then this change is visible to the user</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- 
+         Thrusrvc
+      -->
+				<xsd:element name="Thrusrvc" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation>Creates new Services by combining existing ones</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="ServiceValidity" minOccurs="1" maxOccurs="unbounded" type="DatedSubServiceType">
+								<xsd:annotation>
+									<xsd:documentation>Defines the validity of the combined Service.  The subinterval specified by Firststop and Laststop is half-open with Firststop being always included and Laststop being excluded if Laststop != Firststop</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="ServiceAttribute" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>Adds an attribute to a part of the combined service.  The subinterval specified by Firststop and Laststop is half-open with Firststop being always included and Laststop being excluded if Laststop != Firststop</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:complexContent>
+										<xsd:extension base="DatedSubServiceType">
+											<xsd:attribute name="AttributeId" type="trnsattrid_type" use="required">
+												<xsd:annotation>
+													<xsd:documentation>The attribute to add</xsd:documentation>
+												</xsd:annotation>
+											</xsd:attribute>
+										</xsd:extension>
+									</xsd:complexContent>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="Section" minOccurs="1" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>Specifies a part of a Service that is appended to the combined Service.  The subinterval given by Firststop and Laststop is closed</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:complexContent>
+										<xsd:extension base="SubServiceType">
+											<xsd:attribute name="ServiceId" type="serviceid_type" use="required">
+												<xsd:annotation>
+													<xsd:documentation>The ID of the service to append</xsd:documentation>
+												</xsd:annotation>
+											</xsd:attribute>
+										</xsd:extension>
+									</xsd:complexContent>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+						<xsd:attribute name="CarriageId" type="xsd:nonNegativeInteger" use="required">
+							<xsd:annotation>
+								<xsd:documentation>The ID of this Thrusrvc</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="AttributeInheritance" type="xsd:boolean" default="true">
+							<xsd:annotation>
+								<xsd:documentation>If true then the attributes of the Services that are combined are inherited by the combined Service</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- Thrusrvc -->
+				<!-- 
+         Timetbls
+      -->
+				<xsd:element name="Timetbls" minOccurs="0" maxOccurs="1">
+					<xsd:annotation>
+						<xsd:documentation>Time tables of Services</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<!-- 
+             Service
+          -->
+							<xsd:element name="Service" minOccurs="0" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>Defines a transportation Service and it's time table</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<!-- 
+                ServiceNbr
+             -->
+										<xsd:element name="ServiceNbr" minOccurs="1" maxOccurs="unbounded">
+											<!-- Note: the interpretation of the ServiceNbr and Variant attributes is unclear at this point. -->
+											<xsd:annotation>
+												<xsd:documentation>Defines the company that provides (possibly a part of) this transportation service.  Every leg of transport must be covered by exactly one ServiceNbr element.  The subinterval of stops given by Firststop and Laststop is half-open with Firststop always included and Laststop excluded if Firststop != Laststop</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:complexContent>
+													<xsd:extension base="SubServiceType">
+														<xsd:attribute name="CompanyId" type="companyid_type" use="required">
+															<xsd:annotation>
+																<xsd:documentation>The company providing the transport</xsd:documentation>
+															</xsd:annotation>
+														</xsd:attribute>
+														<xsd:attribute name="ServiceNbr" type="xsd:string" use="required">
+															<xsd:annotation>
+																<xsd:documentation>A code that the passenger uses to identify the Service. e.g. the number of a train, the line number of a bus</xsd:documentation>
+															</xsd:annotation>
+														</xsd:attribute>
+														<xsd:attribute name="Variant" type="xsd:string" use="optional">
+															<xsd:annotation>
+																<xsd:documentation>A code that the providing company uses to identify the Service</xsd:documentation>
+															</xsd:annotation>
+														</xsd:attribute>
+														<xsd:attribute name="Name" type="xsd:string" use="optional">
+															<xsd:annotation>
+																<xsd:documentation>The human readable name of this service</xsd:documentation>
+															</xsd:annotation>
+														</xsd:attribute>
+													</xsd:extension>
+												</xsd:complexContent>
+											</xsd:complexType>
+										</xsd:element>
+										<!-- 
+                ServiceValidity
+             -->
+										<xsd:element name="ServiceValidity" minOccurs="1" maxOccurs="unbounded" type="DatedSubServiceType">
+											<xsd:annotation>
+												<xsd:documentation>Gives the validity (possibly a part) of the Service.  The subinterval of stops given by Firststop and Laststop is half-open with Firststop always included and Laststop excluded if Laststop != Firststop</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<!-- 
+                ServiceTrnsmode
+             -->
+										<xsd:element name="ServiceTrnsmode" minOccurs="1" maxOccurs="unbounded">
+											<xsd:annotation>
+												<xsd:documentation>Gives the transportation mode for (possibly a part) of the Service route.  The subinterval of stops given by Firststop and Laststop is half-open with Firststop always included and Laststop excluded if Laststop != Firststop</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:complexContent>
+													<xsd:extension base="SubServiceType">
+														<xsd:attribute name="TrnsmodeId" type="trnsmodeid_type" use="required">
+															<xsd:annotation>
+																<xsd:documentation>The mode of transportation used for transportation from the Firststop to the Laststop</xsd:documentation>
+															</xsd:annotation>
+														</xsd:attribute>
+													</xsd:extension>
+												</xsd:complexContent>
+											</xsd:complexType>
+										</xsd:element>
+										<!-- 
+                ServiceAttribute
+             -->
+										<xsd:element name="ServiceAttribute" minOccurs="0" maxOccurs="unbounded">
+											<xsd:annotation>
+												<xsd:documentation>Adds an attribute to (possibly a part) of the Service route.  The subinterval of stops given by Firststop and Laststop is half-open with Firststop always included and Laststop excluded if Firststop != Laststop</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:complexContent>
+													<xsd:extension base="DatedSubServiceType">
+														<xsd:attribute name="AttributeId" type="trnsattrid_type" use="required">
+															<xsd:annotation>
+																<xsd:documentation>The ID of the attribute that is available for transportation from the Firststop to the Laststop</xsd:documentation>
+															</xsd:annotation>
+														</xsd:attribute>
+													</xsd:extension>
+												</xsd:complexContent>
+											</xsd:complexType>
+										</xsd:element>
+										<!-- 
+                Stop
+             -->
+										<xsd:element name="Stop" minOccurs="1" maxOccurs="unbounded">
+											<xsd:annotation>
+												<xsd:documentation>Declares a stop of this service</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:attribute name="StationId" type="stationid_type" use="required">
+													<xsd:annotation>
+														<xsd:documentation>The ID of the station to define or refer to</xsd:documentation>
+													</xsd:annotation>
+												</xsd:attribute>
+												<xsd:attribute name="Arrival" type="hhmm" use="optional">
+													<xsd:annotation>
+														<xsd:documentation>The arrival time of the service to this stop's station in the station's local time.  The arrival time is taken to be the same as the departure time if this attribute is not given</xsd:documentation>
+													</xsd:annotation>
+												</xsd:attribute>
+												<xsd:attribute name="Departure" type="hhmm" use="optional">
+													<xsd:annotation>
+														<xsd:documentation>The local departure time of the service from this stop</xsd:documentation>
+													</xsd:annotation>
+												</xsd:attribute>
+												<xsd:attribute name="Type" type="stop_type_type" default="I">
+													<xsd:annotation>
+														<xsd:documentation>The type of this stop</xsd:documentation>
+													</xsd:annotation>
+												</xsd:attribute>
+												<xsd:attribute name="Ix" type="xsd:positiveInteger" use="required">
+													<xsd:annotation>
+														<xsd:documentation>The order number of this stop, counting from one upwards</xsd:documentation>
+													</xsd:annotation>
+												</xsd:attribute>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+									<!-- Service attributes -->
+									<xsd:attribute name="ServiceId" type="serviceid_type" use="required">
+										<xsd:annotation>
+											<xsd:documentation>An ID that uniquely identifies this transportation Service in the document</xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
+							<!-- Service -->
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<!-- Timetbls -->
+			</xsd:sequence>
+			<xsd:attribute name="version" type="xsd:string" fixed="1.0">
+				<xsd:annotation>
+					<xsd:documentation>The version number of the jpdb schema that the document conforms to</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+		<!--
+       jp_database keys
+    -->
+		<xsd:key name="CountryGlobalKey">
+			<xsd:annotation/>
+			<xsd:selector xpath="./Country"/>
+			<xsd:field xpath="@CountryId"/>
+		</xsd:key>
+		<xsd:key name="CompanyLocalKey">
+			<xsd:selector xpath="./Company"/>
+			<xsd:field xpath="@CompanyId"/>
+		</xsd:key>
+		<xsd:key name="TimezoneLocalKey">
+			<xsd:selector xpath="./Timezone"/>
+			<xsd:field xpath="@TimezoneId"/>
+		</xsd:key>
+		<xsd:key name="LanguageGlobalKey">
+			<xsd:selector xpath="./Language"/>
+			<xsd:field xpath="@LanguageId"/>
+		</xsd:key>
+		<xsd:key name="TrnsattrLocalKey">
+			<xsd:selector xpath="./Trnsattr"/>
+			<xsd:field xpath="@TrnsattrId"/>
+		</xsd:key>
+		<xsd:key name="TrnsmodeLocalKey">
+			<xsd:selector xpath="./Trnsmode"/>
+			<xsd:field xpath="@TrnsmodeId"/>
+		</xsd:key>
+		<xsd:key name="StationProviderKey">
+			<xsd:selector xpath="./Station"/>
+			<xsd:field xpath="@StationId"/>
+		</xsd:key>
+		<xsd:key name="FootnoteLocalKey">
+			<xsd:selector xpath="./Footnote"/>
+			<xsd:field xpath="@FootnoteId"/>
+		</xsd:key>
+		<xsd:key name="ThrusrvcLocalKey">
+			<xsd:selector xpath="./Thrusrvc"/>
+			<xsd:field xpath="@CarriageId"/>
+		</xsd:key>
+		<xsd:key name="ServiceLocalKey">
+			<xsd:selector xpath="./Timetbls/Service"/>
+			<xsd:field xpath="@ServiceId"/>
+		</xsd:key>
+		<!--
+       jp_database key references
+    -->
+		<xsd:keyref name="DeliveryCompanyRef" refer="CompanyLocalKey">
+			<xsd:selector xpath="./Delivery"/>
+			<xsd:field xpath="@CompanyId"/>
+		</xsd:keyref>
+		<xsd:keyref name="StationCountryRef" refer="CountryGlobalKey">
+			<xsd:selector xpath="./Station"/>
+			<xsd:field xpath="@CountryId"/>
+		</xsd:keyref>
+		<xsd:keyref name="StationTimezoneRef" refer="TimezoneLocalKey">
+			<xsd:selector xpath="./Station"/>
+			<xsd:field xpath="@TimezoneId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymLanguageLanguageRef" refer="LanguageGlobalKey">
+			<xsd:selector xpath="./Synonym/Language"/>
+			<xsd:field xpath="@LanguageId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymCompanyCompanyRef" refer="CompanyLocalKey">
+			<xsd:selector xpath="./Synonym/Company"/>
+			<xsd:field xpath="@CompanyId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymCountryCountryRef" refer="CountryGlobalKey">
+			<xsd:selector xpath="./Synonym/Country"/>
+			<xsd:field xpath="@CountryId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymStationStationRef" refer="StationProviderKey">
+			<xsd:selector xpath="./Synonym/Station"/>
+			<xsd:field xpath="@StationId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymTrnsattrTrnsattrRef" refer="TrnsattrLocalKey">
+			<xsd:selector xpath="./Synonym/Trnsattr"/>
+			<xsd:field xpath="@TrnsattrId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymTrnsmodeTrnsmodeRef" refer="TrnsmodeLocalKey">
+			<xsd:selector xpath="./Synonym/Trnsmode"/>
+			<xsd:field xpath="@TrnsmodeId"/>
+		</xsd:keyref>
+		<xsd:keyref name="SynonymLanguageRef" refer="LanguageGlobalKey">
+			<xsd:selector xpath="./Synonym"/>
+			<xsd:field xpath="@LanguageId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ChangeServiceRef1" refer="ServiceLocalKey">
+			<xsd:selector xpath="./Change"/>
+			<xsd:field xpath="@ServiceId1"/>
+		</xsd:keyref>
+		<xsd:keyref name="ChangeServiceRef2" refer="ServiceLocalKey">
+			<xsd:selector xpath="./Change"/>
+			<xsd:field xpath="@ServiceId2"/>
+		</xsd:keyref>
+		<xsd:keyref name="ThrusrvcServiceValidityFootnoteRef" refer="FootnoteLocalKey">
+			<xsd:selector xpath="./Thrusrvc/ServiceValidity"/>
+			<xsd:field xpath="@FootnoteId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ThrusrvcServiceAttributeTrnsattrRef" refer="TrnsattrLocalKey">
+			<xsd:selector xpath="./Thrusrvc/ServiceAttribute"/>
+			<xsd:field xpath="@AttributeId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ThrsrvcServiceAttributeFootnoteRef" refer="FootnoteLocalKey">
+			<xsd:selector xpath="./Thrusrvc/ServiceAttribute"/>
+			<xsd:field xpath="@FootnoteId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ThrusrvcSectionServiceRef" refer="ServiceLocalKey">
+			<xsd:selector xpath="./Thrusrvc/Section"/>
+			<xsd:field xpath="@ServiceId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ServiceNbrCompanyRef" refer="CompanyLocalKey">
+			<xsd:selector xpath="./Timetbls/Service/ServiceNbr"/>
+			<xsd:field xpath="@CompanyId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ServiceValidityFootnoteRef" refer="FootnoteLocalKey">
+			<xsd:selector xpath="./Timetbls/Service/ServiceValidity"/>
+			<xsd:field xpath="@FootnoteId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ServiceTrnsmodeTrnsmodeRef" refer="TrnsmodeLocalKey">
+			<xsd:selector xpath="./Timetbls/Service/ServiceTrnsmode"/>
+			<xsd:field xpath="@TrnsmodeId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ServiceAttributeTrnsattrRef" refer="TrnsattrLocalKey">
+			<xsd:selector xpath="./Timetbls/Service/ServiceAttribute"/>
+			<xsd:field xpath="@AttributeId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ServiceAttributeFootnoteRef" refer="FootnoteLocalKey">
+			<xsd:selector xpath="./Timetbls/Service/ServiceAttribute"/>
+			<xsd:field xpath="@FootnoteId"/>
+		</xsd:keyref>
+		<xsd:keyref name="ServiceStopStationRef" refer="StationProviderKey">
+			<xsd:selector xpath="./Timetbls/Service/Stop"/>
+			<xsd:field xpath="StationId"/>
+		</xsd:keyref>
+	</xsd:element>
+	<!-- jp_database -->
+</xsd:schema>
