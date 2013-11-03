@@ -85,7 +85,7 @@ class KalkatiHandler(ContentHandler):
         KKJEasting = float(attrs['Y'])
         KKJLoc = {'P': KKJNorthing, 'I' : KKJEasting}
         WGS84lalo = KKJxy_to_WGS84lalo(KKJin=KKJLoc, zone=3)
-        
+
         self._store_data("stops", (attrs['StationId'],
                 attrs.get('Name', "Unnamed").replace(",", " "),
                 str(WGS84lalo['La']), str(WGS84lalo['Lo'])))
@@ -229,7 +229,7 @@ def write_values(files, name, values):
 
 
 def main(filename, directory):
-    names = ["stops", "agency", 'calendar', 'stop_times', 'trips', 'routes']
+    names = ['stops', 'agency', 'calendar', 'stop_times', 'trips', 'routes']
     files = {}
     for name in names:
         files[name] = file(os.path.join(directory, "%s.txt" % name), "w")
