@@ -66,6 +66,9 @@ class KalkatiHandler(ContentHandler):
     service_count = 0
     routes = {}
 
+    stations = {}
+    stops = []
+
     synonym = False
     stop_sequence = None
     trip_id = None
@@ -86,14 +89,14 @@ class KalkatiHandler(ContentHandler):
         KKJLoc = {'P': KKJNorthing, 'I' : KKJEasting}
         WGS84lalo = KKJxy_to_WGS84lalo(KKJin=KKJLoc, zone=3)
 
-        self._store_data("stops", (attrs['StationId'],
+        self._store_data("stops", [attrs['StationId'],
                 attrs.get('Name', "Unnamed").replace(",", " "),
-                str(WGS84lalo['La']), str(WGS84lalo['Lo'])))
+                str(WGS84lalo['La']), str(WGS84lalo['Lo'])])
 
     def add_agency(self, attrs):
-        self._store_data("agency", (attrs['CompanyId'],
+        self._store_data("agency", [attrs['CompanyId'],
                 attrs['Name'].replace(",", " "),
-                "http://example.com", timezone))  # can't know
+                "http://example.com", timezone])  # can't know
 
     def add_calendar(self, attrs):
         """This is the inaccurate part of the whole operation!
@@ -105,10 +108,10 @@ class KalkatiHandler(ContentHandler):
         first_date = date(*map(int, first.split('-')))
         vector = attrs['Vector']
         if not len(vector):
-            null = ("0",) * 7
+            null = ["0",] * 7
             empty_date = first.replace("-", "")
-            self._store_data("calendar", (service_id,) + null +
-                    (empty_date, empty_date))
+            self._store_data("calendar", [service_id,] + null +
+                    [empty_date, empty_date])
             return
         end_date = first_date + timedelta(days=len(vector))
         weekday = first_date.weekday()
@@ -121,8 +124,8 @@ class KalkatiHandler(ContentHandler):
         weekdays = map(lambda x: "1" if x > avg else "0", weekdays)
         fd = str(first_date).replace("-", "")
         ed = str(end_date).replace("-", "")
-        self._store_data("calendar", (service_id,) + tuple(weekdays) +
-                (fd, ed))
+        self._store_data("calendar", [service_id,] + list(weekdays) +
+                [fd, ed])
 
     def add_stop_time(self, attrs):
         self.stop_sequence.append(attrs['StationId'])
@@ -133,8 +136,8 @@ class KalkatiHandler(ContentHandler):
                     attrs["Departure"][2:], "00"))
         else:
             departure_time = arrival_time
-        self._store_data("stop_times", (self.trip_id, arrival_time,
-                departure_time, attrs["StationId"], attrs["Ix"]))
+        self._store_data("stop_times", [self.trip_id, arrival_time,
+                departure_time, attrs["StationId"], attrs["Ix"]])
 
     def add_route(self, route_id):
         route_type = "3"  # fallback is bus
@@ -143,23 +146,35 @@ class KalkatiHandler(ContentHandler):
             if trans_mode in KALKATI_MODE_TO_GTFS_MODE:
                 route_type = KALKATI_MODE_TO_GTFS_MODE[trans_mode]
 
-        self._store_data("routes", (route_id, self.route_agency_id,
-                "", self.route_name.replace(",", "."), route_type))
+        self._store_data("routes", [route_id, self.route_agency_id,
+                "", self.route_name.replace(",", "."), route_type], {
+            "stops": self.stops
+        })
 
     def add_trip(self, route_id):
         for service_id in self.service_validities:
-            self._store_data("trips", (route_id, service_id, self.trip_id,))
+            self._store_data("trips", [route_id, service_id, self.trip_id,])
 
-    def _store_data(self, key, value):
+    def _store_data(self, key, data, extra=None):
         if(key not in self.data): self.data[key] = []
 
-        self.data[key].append(value)
+        d = {
+            "data": data
+        }
+
+        if extra:
+            d.update(extra)
+
+        self.data[key].append(d)
 
     def startElement(self, name, attrs):
         if not self.synonym and name == "Company":
             self.add_agency(attrs)
         elif not self.synonym and name == "Station":
             self.add_stop(attrs)
+            self.stations[attrs["StationId"]] = {
+                "name": attrs["Name"]
+            }
         elif not self.synonym and name == "Trnsmode":
             if "ModeType" in attrs:
                 self.transmodes[attrs["TrnsmodeId"]] = attrs["ModeType"]
@@ -172,15 +187,17 @@ class KalkatiHandler(ContentHandler):
             self.trip_id = attrs["ServiceId"]
             self.service_validities = []
             self.stop_sequence = []
+            self.stops = []
         elif name == "ServiceNbr":
             self.route_agency_id = attrs["CompanyId"]
-            self.route_name = attrs.get("Name", "Unnamed")
+            self.route_name = attrs.get("Name", "")
         elif name == "ServiceValidity":
             self.service_validities.append(attrs["FootnoteId"])
         elif name == "ServiceTrnsmode":
             self.service_mode = attrs["TrnsmodeId"]
         elif name == "Stop":
             self.add_stop_time(attrs)
+            self.stops.append(self.stations[attrs["StationId"]])
         elif name == "Synonym":
             self.synonym = True
 
@@ -228,6 +245,16 @@ def write_values(files, name, values):
     files[name].write((u",".join(values) + u"\n").encode('utf-8'))
 
 
+def transform(data):
+    for route in data["routes"]:
+        if not route["data"][2]:
+            name = route["stops"][0]["name"] + ' -- ' + route["stops"][-1]["name"]
+
+            route["data"][2] = name
+
+    return data
+
+
 def main(filename, directory):
     names = ['stops', 'agency', 'calendar', 'stop_times', 'trips', 'routes']
     files = {}
@@ -239,11 +266,9 @@ def main(filename, directory):
 
     init_files(files)
 
-    # TODO: transform data now
-
-    for k in handler.data:
+    for k in transform(handler.data):
         for item in handler.data[k]:
-            write_values(files, k, item)
+            write_values(files, k, item["data"])
 
     for name in names:
         files[name].close()
