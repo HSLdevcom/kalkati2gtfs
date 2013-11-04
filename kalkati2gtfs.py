@@ -13,7 +13,7 @@ import sys
 import xml.sax
 from xml.sax.handler import ContentHandler
 
-from calendar import to_ints, splice, true_for_all, true_for_some, true_for_week, get_date
+from calendar import to_ints, splice, true_for_all, true_for_some, true_for_week, get_date, get_dates
 from coordinates import KKJxy_to_WGS84lalo
 
 #from django.contrib.gis.geos import Point # needed for transformations
@@ -128,7 +128,9 @@ class KalkatiHandler(ContentHandler):
         self._store_data("calendar", [service_id,] + map(str, week_overlaps) +
                 [fd, ed])
 
-        # TODO: write sub into calendar_dates.txt
+        # add irregular dates
+        for d in get_dates(sub, first_date):
+            self._store_data("calendar_dates", [service_id, str(d).replace("-", ""), '1'])
 
     def add_stop_time(self, attrs):
         self.stop_sequence.append(attrs['StationId'])
@@ -237,7 +239,8 @@ def init_files(files):
             u"stop_id", u"stop_sequence",),
         "calendar": (u'service_id', u'monday', u'tuesday', u'wednesday',
             u'thursday', u'friday', u'saturday', u'sunday', u'start_date',
-            u'end_date',)
+            u'end_date',),
+        "calendar_dates": (u'service_id', u'date', u'exception_type')
     }
 
     for name in files:
@@ -259,8 +262,9 @@ def transform(data):
 
 
 def main(filename, directory):
-    names = ['stops', 'agency', 'calendar', 'stop_times', 'trips', 'routes']
+    names = ['stops', 'agency', 'calendar', 'stop_times', 'trips', 'routes', 'calendar_dates']
     files = {}
+
     for name in names:
         files[name] = file(os.path.join(directory, "%s.txt" % name), "w")
 
