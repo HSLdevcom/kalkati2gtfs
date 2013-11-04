@@ -7,12 +7,13 @@ License: MIT License
 
 """
 
-from datetime import date, timedelta
+from datetime import timedelta
 import os
 import sys
 import xml.sax
 from xml.sax.handler import ContentHandler
 
+from calendar import to_ints, splice, true_for_all, true_for_some, true_for_week, get_date
 from coordinates import KKJxy_to_WGS84lalo
 
 #from django.contrib.gis.geos import Point # needed for transformations
@@ -105,27 +106,29 @@ class KalkatiHandler(ContentHandler):
         """
         service_id = attrs['FootnoteId']
         first = attrs['Firstdate']
-        first_date = date(*map(int, first.split('-')))
+        first_date = get_date(first)
         vector = attrs['Vector']
+
         if not len(vector):
             null = ["0",] * 7
             empty_date = first.replace("-", "")
             self._store_data("calendar", [service_id,] + null +
                     [empty_date, empty_date])
             return
+
         end_date = first_date + timedelta(days=len(vector))
-        weekday = first_date.weekday()
-        weekdays = [0] * 7
-        for i, day in enumerate(vector):
-            weekdays[(weekday + i) % 7] += int(day)
-        # only take services that appear at least half the maximum appearance
-        # this is an oversimplification, sufficient for me for now
-        avg = max(weekdays) / 2.0
-        weekdays = map(lambda x: "1" if x > avg else "0", weekdays)
+
+        days = to_ints(list(vector))
+        overlaps = true_for_all(days)
+        sub = true_for_some(days, overlaps)
+        week_overlaps = true_for_week(overlaps, first_date)
+
         fd = str(first_date).replace("-", "")
         ed = str(end_date).replace("-", "")
-        self._store_data("calendar", [service_id,] + list(weekdays) +
+        self._store_data("calendar", [service_id,] + map(str, week_overlaps) +
                 [fd, ed])
+
+        # TODO: write sub into calendar_dates.txt
 
     def add_stop_time(self, attrs):
         self.stop_sequence.append(attrs['StationId'])
