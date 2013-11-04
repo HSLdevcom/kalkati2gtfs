@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 import itertools
 
 
@@ -30,29 +30,34 @@ def atleast(arr, amt):
 
     return arr
 
-def true_for_week(trueAll, firstDate):
-    offset = firstDate.weekday()
+def true_for_week(true_all, first_date):
+    offset = first_date.weekday()
 
-    return trueAll[offset: offset + 7]
+    return true_all[offset: offset + 7]
 
-def true_for_some(days, trueAll):
-    return map(lambda (a, b): 1 if a and not b else 0, zip(days, trueAll))
+def true_for_some(days, true_all):
+    return map(lambda (a, b): 1 if a and not b else 0, zip(days, true_all))
 
 def get_date(str):
     return date(*map(int, str.split('-')))
 
+def get_dates(arr, first_date):
+    return filter(lambda a: a, map(lambda (i, v): v and first_date + timedelta(days=i), enumerate(arr)))
+
 def main():
-    firstDate = get_date('2013-11-03')
+    first_date = get_date('2013-11-03')
     days = to_ints(list('10010010100001'))
     overlaps = true_for_all(days)
     sub = true_for_some(days, overlaps)
-    weekOverlaps = true_for_week(overlaps, firstDate)
+    sub_dates = get_dates(sub, first_date)
+    week_overlaps = true_for_week(overlaps, first_date)
 
-    print firstDate.weekday() # should be 6 for Sunday
+    print first_date.weekday() # should be 6 for Sunday
     print 'days', days
     print 'overlaps', overlaps
-    print 'week overlaps', weekOverlaps
+    print 'week overlaps', week_overlaps
     print 'sub', sub
+    print 'sub dates', sub_dates
 
 if __name__ == '__main__':
     main()
