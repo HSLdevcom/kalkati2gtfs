@@ -248,6 +248,10 @@ def init_files(files):
 
 
 def write_values(files, name, values):
+    for i in range(len(values)):
+        # XXX implement full csv escaping rules
+        if ',' in values[i]:
+            values[i] = '"' + values[i] + '"'
     files[name].write((u",".join(values) + u"\n").encode('utf-8'))
 
 
