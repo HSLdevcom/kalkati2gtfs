@@ -257,10 +257,10 @@ def write_values(files, name, values):
 
 def transform(data):
     for route in data["routes"]:
-        if not route["data"][2]:
+        if not route["data"][3]:
             name = route["stops"][0]["name"] + ' -- ' + route["stops"][-1]["name"]
 
-            route["data"][2] = name
+            route["data"][3] = name
 
     return data
 
