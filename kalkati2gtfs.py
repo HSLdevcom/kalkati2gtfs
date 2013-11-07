@@ -152,7 +152,7 @@ class KalkatiHandler(ContentHandler):
                 route_type = KALKATI_MODE_TO_GTFS_MODE[trans_mode]
 
         self._store_data("routes", [route_id, self.route_agency_id,
-                "", self.route_name.replace(",", "."), route_type], {
+                self.route_short_name, self.route_name.replace(",", "."), route_type], {
             "stops": self.stops
         })
 
@@ -200,6 +200,7 @@ class KalkatiHandler(ContentHandler):
         elif name == "ServiceNbr":
             self.route_agency_id = attrs["CompanyId"]
             self.route_name = attrs.get("Name", "")
+            self.route_short_name = attrs.get("Variant", attrs.get("ServiceNbr", ""))
         elif name == "ServiceValidity":
             self.service_validities.append(attrs["FootnoteId"])
         elif name == "ServiceTrnsmode":
@@ -227,6 +228,7 @@ class KalkatiHandler(ContentHandler):
             self.stop_sequence = None
             self.route_agency_id = None
             self.route_name = None
+            self.route_short_name = None
             self.service_validities = None
             self.service_mode = None
 
@@ -261,10 +263,21 @@ def write_values(files, name, values):
 
 def transform(data):
     for route in data["routes"]:
+        # if the route has no long name, form one based on terminal stations:
         if not route["data"][3]:
             name = route["stops"][0]["name"] + ' -- ' + route["stops"][-1]["name"]
 
             route["data"][3] = name
+
+        route["data"][2] = route["data"][2].strip(", ")
+
+        # filter out some invalid short names:
+        if route["data"][2] in ["0", "MH_EI_LINJATUNNUSTA", "MH_Expr", "MH_Pika", "Metro", "Lautta"]:
+            route["data"][2] = ""
+
+        # filter out short names that actually are internal long numbers:
+        if len(route["data"][2])>4 and route["data"][2].isdigit():
+            route["data"][2] = ""
 
     return data
 
