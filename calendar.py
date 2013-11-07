@@ -18,15 +18,12 @@ def splice(arr, amt):
 
 def true_for_all(days):
     weeks = splice(days, 7)
-    capture = atleast(map(all, zip(*weeks)), 7)
+    padded_weeks = map(lambda week: atleast(week, 7, 1), weeks)
+    return to_ints(map(all, zip(*padded_weeks)) * len(weeks))[0:len(days)]
 
-    return list(itertools.chain(*map(lambda week: map(
-        lambda (i, v): 1 if v and capture[i % 7] else 0, enumerate(week)),
-        weeks)))
-
-def atleast(arr, amt):
+def atleast(arr, amt, value=0):
     if(len(arr) < amt):
-        return arr + [0] * (amt - len(arr))
+        return arr + [value] * (amt - len(arr))
 
     return arr
 
