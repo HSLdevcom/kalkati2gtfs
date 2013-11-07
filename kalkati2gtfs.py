@@ -141,7 +141,7 @@ class KalkatiHandler(ContentHandler):
                     attrs["Departure"][2:], "00"))
         else:
             departure_time = arrival_time
-        self._store_data("stop_times", [self.trip_id, arrival_time,
+        self._write_data("stop_times", [self.trip_id, arrival_time,
                 departure_time, attrs["StationId"], attrs["Ix"]])
 
     def add_route(self, route_id):
@@ -171,6 +171,10 @@ class KalkatiHandler(ContentHandler):
             d.update(extra)
 
         self.data[key].append(d)
+
+    def _write_data(self, key, data):
+        """Write data entry directly to file that corresponds to key."""
+        write_values(self.files, key, data)
 
     def startElement(self, name, attrs):
         if not self.synonym and name == "Company":
@@ -272,10 +276,10 @@ def main(filename, directory):
     for name in names:
         files[name] = file(os.path.join(directory, "%s.txt" % name), "w")
 
+    init_files(files)
+
     handler = KalkatiHandler(files)
     xml.sax.parse(filename, handler)
-
-    init_files(files)
 
     for k in transform(handler.data):
         for item in handler.data[k]:
