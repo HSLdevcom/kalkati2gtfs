@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import unittest
 from datetime import date, timedelta
-from calendar import get_date, to_ints, true_for_all, true_for_some, get_dates, true_for_week, atleast, splice
+from calendar import get_date, to_ints, true_for_all, true_for_some, get_dates, true_for_weeks, atleast, splice
 
 
 class TestGetDate(unittest.TestCase):
@@ -24,9 +24,30 @@ class TestToInts(unittest.TestCase):
         self.assertEqual(to_ints(list('101')), [1, 0, 1])
 
 
-class TestTrueForWeek(unittest.TestCase):
-    def test_true_for_week(self):
-        pass # TODO
+class TestTrueForWeeks(unittest.TestCase):
+    def test_true_for_weeks_on_monday(self):
+        d = get_date('2013-11-04')
+        days = [1, 0, 0, 1, 0, 0, 0,
+            1]
+        overlaps = true_for_all(days)
+
+        self.assertEqual(true_for_weeks(days, d), days)
+
+    def test_true_for_weeks_on_monday_half(self):
+        d = get_date('2013-11-04')
+        days = [1, 0, 0]
+        overlaps = true_for_all(days)
+
+        self.assertEqual(true_for_weeks(days, d), [1, 0, 0, 0, 0, 0, 0])
+
+    def test_true_for_weeks_on_friday(self):
+        d = get_date('2013-11-08')
+        days = [1, 0, 0, 1, 0, 0, 0,
+            1]
+        overlaps = true_for_all(days)
+
+        self.assertEqual(true_for_weeks(days, d), [0, 0, 0, 1, 0, 0, 1,
+            0])
 
 
 class TestTrueForAll(unittest.TestCase):

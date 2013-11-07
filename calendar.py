@@ -1,5 +1,6 @@
-from datetime import date, timedelta
 import itertools
+from collections import deque
+from datetime import date, timedelta
 
 
 def to_ints(arr):
@@ -27,13 +28,17 @@ def atleast(arr, amt, value=0):
 
     return arr
 
-def true_for_week(true_all, first_date):
-    offset = 7-first_date.weekday()
+def true_for_weeks(true_all, first_date):
+    " This rotates `true_all` based on `first_date` so that it begins on Monday "
+
     # if there's data for less than a week, expand with zeros
     true_all = atleast(true_all, 7)
-    true_week = true_all[:7]
-    # rotate the week to start on monday
-    return (true_week+true_week)[offset: offset + 7]
+
+    true_week = deque(true_all[0:7])
+    true_week.rotate(7 - first_date.weekday())
+    true_week = list(true_week)
+
+    return (true_week * ((len(true_all) % 7) + 1))[0:len(true_all)]
 
 
 def true_for_some(days):
@@ -51,7 +56,7 @@ def main():
     overlaps = true_for_all(days)
     sub = true_for_some(days)
     sub_dates = get_dates(sub, first_date)
-    week_overlaps = true_for_week(overlaps, first_date)
+    week_overlaps = true_for_weeks(overlaps, first_date)
 
     print first_date.weekday() # should be 6 for Sunday
     print 'days', days
@@ -61,7 +66,7 @@ def main():
     print 'sub dates', sub_dates
 
     for day in "04 05 06 07 08 09 10".split():
-        print true_for_week(true_for_all(to_ints(list("01111111"))), get_date("2013-11-"+day))
+        print true_for_weeks(true_for_all(to_ints(list("01111111"))), get_date("2013-11-"+day))
 
 if __name__ == '__main__':
     main()

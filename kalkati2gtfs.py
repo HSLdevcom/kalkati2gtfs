@@ -13,7 +13,7 @@ import sys
 import xml.sax
 from xml.sax.handler import ContentHandler
 
-from calendar import to_ints, splice, true_for_all, true_for_some, true_for_week, get_date, get_dates
+from calendar import to_ints, splice, true_for_all, true_for_some, true_for_weeks, get_date, get_dates
 from coordinates import KKJxy_to_WGS84lalo
 
 #from django.contrib.gis.geos import Point # needed for transformations
@@ -100,10 +100,6 @@ class KalkatiHandler(ContentHandler):
                 "http://example.com", timezone])  # can't know
 
     def add_calendar(self, attrs):
-        """This is the inaccurate part of the whole operation!
-        This assumes that the footnote vector has a regular shape
-        i.e. every week the same service
-        """
         service_id = attrs['FootnoteId']
         first = attrs['Firstdate']
         first_date = get_date(first)
@@ -121,7 +117,7 @@ class KalkatiHandler(ContentHandler):
         days = to_ints(list(vector))
         overlaps = true_for_all(days)
         sub = true_for_some(days)
-        week_overlaps = true_for_week(overlaps, first_date)
+        week_overlaps = true_for_weeks(overlaps, first_date)
 
         fd = str(first_date).replace("-", "")
         ed = str(end_date).replace("-", "")
