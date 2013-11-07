@@ -117,7 +117,7 @@ class KalkatiHandler(ContentHandler):
         days = to_ints(list(vector))
         overlaps = true_for_all(days)
         sub = true_for_some(days)
-        week_overlaps = true_for_weeks(overlaps, first_date)
+        week_overlaps = true_for_weeks(overlaps, first_date)[:7]
 
         fd = str(first_date).replace("-", "")
         ed = str(end_date).replace("-", "")
