@@ -85,8 +85,8 @@ class KalkatiHandler(ContentHandler):
     def add_stop(self, attrs):
         #point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
         #point.transform(4326) # WGS84
-        KKJNorthing = float(attrs['X'])
-        KKJEasting = float(attrs['Y'])
+        KKJNorthing = float(attrs['Y'])
+        KKJEasting = float(attrs['X'])
         KKJLoc = {'P': KKJNorthing, 'I' : KKJEasting}
         WGS84lalo = KKJxy_to_WGS84lalo(KKJin=KKJLoc, zone=3)
 
