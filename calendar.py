@@ -11,7 +11,7 @@ def splice(arr, amt):
 
     ret = list()
 
-    for i in range(0, amt + 1, 7):
+    for i in range(0, amt + 1, amt):
         ret.append(arr[i: i + amt])
 
     return ret
@@ -39,8 +39,8 @@ def true_for_week(true_all, first_date):
     return (true_week+true_week)[offset: offset + 7]
 
 
-def true_for_some(days, true_all):
-    return map(lambda (a, b): 1 if a and not b else 0, zip(days, true_all))
+def true_for_some(days):
+    return map(lambda (a, b): 1 if a and not b else 0, zip(days, true_for_all(days)))
 
 def get_date(str):
     return date(*map(int, str.split('-')))
@@ -52,7 +52,7 @@ def main():
     first_date = get_date('2013-11-03')
     days = to_ints(list('10010010100001'))
     overlaps = true_for_all(days)
-    sub = true_for_some(days, overlaps)
+    sub = true_for_some(days)
     sub_dates = get_dates(sub, first_date)
     week_overlaps = true_for_week(overlaps, first_date)
 
