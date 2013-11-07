@@ -85,8 +85,8 @@ class KalkatiHandler(ContentHandler):
     def add_stop(self, attrs):
         #point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
         #point.transform(4326) # WGS84
-        KKJNorthing = float(attrs['X'])
-        KKJEasting = float(attrs['Y'])
+        KKJNorthing = float(attrs['Y'])
+        KKJEasting = float(attrs['X'])
         KKJLoc = {'P': KKJNorthing, 'I' : KKJEasting}
         WGS84lalo = KKJxy_to_WGS84lalo(KKJin=KKJLoc, zone=3)
 
@@ -248,15 +248,19 @@ def init_files(files):
 
 
 def write_values(files, name, values):
+    for i in range(len(values)):
+        # XXX implement full csv escaping rules
+        if ',' in values[i]:
+            values[i] = '"' + values[i] + '"'
     files[name].write((u",".join(values) + u"\n").encode('utf-8'))
 
 
 def transform(data):
     for route in data["routes"]:
-        if not route["data"][2]:
+        if not route["data"][3]:
             name = route["stops"][0]["name"] + ' -- ' + route["stops"][-1]["name"]
 
-            route["data"][2] = name
+            route["data"][3] = name
 
     return data
 

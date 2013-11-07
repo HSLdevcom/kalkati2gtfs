@@ -6,7 +6,7 @@ def to_ints(arr):
     return map(int, arr)
 
 def splice(arr, amt):
-    if len(arr) < amt:
+    if len(arr) <= amt:
         return [arr]
 
     ret = list()
@@ -31,9 +31,13 @@ def atleast(arr, amt):
     return arr
 
 def true_for_week(true_all, first_date):
-    offset = first_date.weekday()
+    offset = 7-first_date.weekday()
+    # if there's data for less than a week, expand with zeros
+    true_all = atleast(true_all, 7)
+    true_week = true_all[:7]
+    # rotate the week to start on monday
+    return (true_week+true_week)[offset: offset + 7]
 
-    return true_all[offset: offset + 7]
 
 def true_for_some(days, true_all):
     return map(lambda (a, b): 1 if a and not b else 0, zip(days, true_all))
@@ -58,6 +62,9 @@ def main():
     print 'week overlaps', week_overlaps
     print 'sub', sub
     print 'sub dates', sub_dates
+
+    for day in "04 05 06 07 08 09 10".split():
+        print true_for_week(true_for_all(to_ints(list("01111111"))), get_date("2013-11-"+day))
 
 if __name__ == '__main__':
     main()
