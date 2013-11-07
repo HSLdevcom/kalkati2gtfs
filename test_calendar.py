@@ -50,8 +50,8 @@ class TestTrueForSome(unittest.TestCase):
         days = [1, 0, 1, 0, 0, 0, 0,
                 1, 1]
 
-        #self.assertEqual(true_for_some(days), [0, 0, 1, 0, 0, 0, 0,
-        #    0, 1])
+        self.assertEqual(true_for_some(days), [0, 0, 0, 0, 0, 0, 0,
+            0, 1])
 
 
 class TestAtleast(unittest.TestCase):
