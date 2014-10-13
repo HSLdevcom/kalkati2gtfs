@@ -50,7 +50,7 @@ GTFS Transport Modes
 KALKATI_MODE_TO_GTFS_MODE = {
     "2": "2",
     "21": "2",
-    "22": "0",
+    "22": "2",
     "23": "2",
     "3": "1",
     "4": "0",
