@@ -78,6 +78,8 @@ class KalkatiHandler(ContentHandler):
     route_name = None
     service_validities = None
     service_mode = None
+    invalid_trip = False
+    previous_time = None
     transmodes = {}
     transattrs = {}
 
@@ -90,7 +92,7 @@ class KalkatiHandler(ContentHandler):
         KKJEasting = float(attrs['X'])
         KKJLoc = {'P': KKJNorthing, 'I' : KKJEasting}
         WGS84lalo = KKJxy_to_WGS84lalo(KKJin=KKJLoc, zone=3)
-	(company, stop) = attrs['StationId'].split(":",1)
+        (company, stop) = attrs['StationId'].split(":",1)
         self._store_data(company, "stops", [attrs['StationId'].split(":",1)[-1],
                 attrs.get('Name', "Unnamed").replace(",", " "),
                 str(WGS84lalo['La']), str(WGS84lalo['Lo'])])
@@ -160,6 +162,10 @@ class KalkatiHandler(ContentHandler):
                     attrs["Departure"][2:], "00"))
         else:
             departure_time = arrival_time
+        if arrival_time < self.previous_time:
+            print("Departure before arrival " + self.route_agency_id + ":" + self.route_short_name + ":" + self.route_name + ":" + attrs["Ix"])
+            self.invalid_trip = True
+        self.previous_time = departure_time
         self._write_data(self.route_agency_id, "stop_times", [self.trip_id, arrival_time,
                 departure_time, attrs["StationId"].split(":",1)[-1], attrs["Ix"]])
 
@@ -225,11 +231,13 @@ class KalkatiHandler(ContentHandler):
         elif name == "Service":
             self.service_count += 1
             if self.service_count % 1000 == 0:
-                print "Services processed: %d" % self.service_count
+                print("Services processed: %d" % self.service_count)
             self.trip_id = attrs["ServiceId"]
             self.service_validities = []
             self.stop_sequence = []
             self.stops = []
+            self.invalid_trip = False
+            self.previous_time = None
         elif name == "ServiceNbr":
             self.route_agency_id = attrs["CompanyId"]
             self.route_name = attrs.get("Name", "")
@@ -244,7 +252,7 @@ class KalkatiHandler(ContentHandler):
                 self.add_stop_time(attrs)
                 self.stops.append(self.stations[company][id])
             else:
-                print "Skipping " + attrs["StationId"]
+                print("Skipping " + attrs["StationId"])
         elif name == "Synonym":
             self.synonym = True
 
@@ -260,7 +268,8 @@ class KalkatiHandler(ContentHandler):
                 route_id = str(self.route_count)
                 self.routes[self.route_agency_id][route_seq] = route_id
                 self.add_route(route_id)
-            self.add_trip(route_id)
+            if not self.invalid_trip:
+                self.add_trip(route_id)
             self.trip_id = None
             self.stop_sequence = None
             self.route_agency_id = None
