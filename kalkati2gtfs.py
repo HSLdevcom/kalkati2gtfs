@@ -80,6 +80,7 @@ class KalkatiHandler(ContentHandler):
     service_mode = None
     invalid_trip = False
     previous_time = None
+    stop_times = []
     transmodes = {}
     transattrs = {}
 
@@ -162,12 +163,12 @@ class KalkatiHandler(ContentHandler):
                     attrs["Departure"][2:], "00"))
         else:
             departure_time = arrival_time
-        if arrival_time < self.previous_time:
+        if arrival_time < self.previous_time or departure_time < arrival_time:
             print("Departure before arrival " + self.route_agency_id + ":" + self.route_short_name + ":" + self.route_name + ":" + attrs["Ix"])
             self.invalid_trip = True
         self.previous_time = departure_time
-        self._write_data(self.route_agency_id, "stop_times", [self.trip_id, arrival_time,
-                departure_time, attrs["StationId"].split(":",1)[-1], attrs["Ix"]])
+        self.stop_times.append((self.route_agency_id, "stop_times", [self.trip_id, arrival_time,
+                departure_time, attrs["StationId"].split(":",1)[-1], attrs["Ix"]]))
 
     def add_route(self, route_id):
         route_type = "3"  # fallback is bus
@@ -238,6 +239,7 @@ class KalkatiHandler(ContentHandler):
             self.stops = []
             self.invalid_trip = False
             self.previous_time = None
+            self.stop_times = []
         elif name == "ServiceNbr":
             self.route_agency_id = attrs["CompanyId"]
             self.route_name = attrs.get("Name", "")
@@ -270,6 +272,8 @@ class KalkatiHandler(ContentHandler):
                 self.add_route(route_id)
             if not self.invalid_trip:
                 self.add_trip(route_id)
+                for stop_time in self.stop_times:
+                    self._write_data(stop_time[0], stop_time[1], stop_time[2])
             self.trip_id = None
             self.stop_sequence = None
             self.route_agency_id = None
