@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """
 Kalkati to GTFS converter
 Beware: it simplifies some things.
@@ -48,10 +49,10 @@ GTFS Transport Modes
 """
 
 KALKATI_MODE_TO_GTFS_MODE = {
-    "2": "2",
-    "21": "2",
-    "22": "2",
-    "23": "2",
+    "2": "106",  # In practice Kalkati marks trains such as Jyväskylä - Vaasa as 2
+    "21": "102",  # Express, InterCity and Tolstoi trains
+    "22": "109",  # Capital area trains
+    "23": "101",  # Pendolino and Allegro
     "3": "1",
     "4": "0",
     "5": "3",
