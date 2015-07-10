@@ -6,6 +6,7 @@ from datetime import date, timedelta
 def to_ints(arr):
     return map(int, arr)
 
+
 def splice(arr, amt):
     if len(arr) <= amt:
         return [arr]
@@ -17,16 +18,19 @@ def splice(arr, amt):
 
     return ret
 
+
 def true_for_all(days):
     weeks = splice(days, 7)
     padded_weeks = map(lambda week: atleast(week, 7, 1), weeks)
     return to_ints(map(all, zip(*padded_weeks)) * len(weeks))[0:len(days)]
+
 
 def atleast(arr, amt, value=0):
     if(len(arr) < amt):
         return arr + [value] * (amt - len(arr))
 
     return arr
+
 
 def true_for_weeks(true_all, first_date):
     " This rotates `true_all` based on `first_date` so that it begins on Monday "
@@ -44,11 +48,14 @@ def true_for_weeks(true_all, first_date):
 def true_for_some(days):
     return map(lambda (a, b): 1 if a and not b else 0, zip(days, true_for_all(days)))
 
+
 def get_date(str):
     return date(*map(int, str.split('-')))
 
+
 def get_dates(arr, first_date):
     return filter(lambda a: a, map(lambda (i, v): v and first_date + timedelta(days=i), enumerate(arr)))
+
 
 def main():
     first_date = get_date('2013-11-03')
@@ -58,7 +65,7 @@ def main():
     sub_dates = get_dates(sub, first_date)
     week_overlaps = true_for_weeks(overlaps, first_date)
 
-    print first_date.weekday() # should be 6 for Sunday
+    print first_date.weekday()  # should be 6 for Sunday
     print 'days', days
     print 'overlaps', overlaps
     print 'week overlaps', week_overlaps

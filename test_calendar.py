@@ -27,8 +27,7 @@ class TestToInts(unittest.TestCase):
 class TestTrueForWeeks(unittest.TestCase):
     def test_true_for_weeks_on_monday(self):
         d = get_date('2013-11-04')
-        days = [1, 0, 0, 1, 0, 0, 0,
-            1]
+        days = [1, 0, 0, 1, 0, 0, 0, 1]
         overlaps = true_for_all(days)
 
         self.assertEqual(true_for_weeks(days, d), days)
@@ -42,12 +41,10 @@ class TestTrueForWeeks(unittest.TestCase):
 
     def test_true_for_weeks_on_friday(self):
         d = get_date('2013-11-08')
-        days = [1, 0, 0, 1, 0, 0, 0,
-            1]
+        days = [1, 0, 0, 1, 0, 0, 0, 1]
         overlaps = true_for_all(days)
 
-        self.assertEqual(true_for_weeks(days, d), [0, 0, 0, 1, 0, 0, 1,
-            0])
+        self.assertEqual(true_for_weeks(days, d), [0, 0, 0, 1, 0, 0, 1, 0])
 
 
 class TestTrueForAll(unittest.TestCase):
@@ -56,23 +53,20 @@ class TestTrueForAll(unittest.TestCase):
                1, 1, 0, 0, 1, 1, 0]
 
         self.assertEqual(true_for_all(arr), [1, 0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 0])
+                                             1, 0, 0, 0, 0, 0, 0])
 
     def test_true_for_all_not_full(self):
         arr = [1, 0, 0, 0, 0, 0, 1,
                1, 1]
 
-        self.assertEqual(true_for_all(arr), [1, 0, 0, 0, 0, 0, 1,
-            1, 0])
+        self.assertEqual(true_for_all(arr), [1, 0, 0, 0, 0, 0, 1, 1, 0])
 
 
 class TestTrueForSome(unittest.TestCase):
     def test_true_for_some(self):
-        days = [1, 0, 1, 0, 0, 0, 0,
-                1, 1]
+        days = [1, 0, 1, 0, 0, 0, 0, 1, 1]
 
-        self.assertEqual(true_for_some(days), [0, 0, 0, 0, 0, 0, 0,
-            0, 1])
+        self.assertEqual(true_for_some(days), [0, 0, 0, 0, 0, 0, 0, 0, 1])
 
 
 class TestAtleast(unittest.TestCase):
