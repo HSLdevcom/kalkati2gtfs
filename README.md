@@ -4,7 +4,7 @@ This converter converts kalkati to gtfs.
 
 ## Dependencies
 
-(Django, geos.)
+coordinates.py (included)
 
 ## Possible targets for stripping for test data
 

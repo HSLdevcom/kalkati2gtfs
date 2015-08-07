@@ -16,8 +16,6 @@ from xml.sax.handler import ContentHandler
 from calendar import to_ints, splice, true_for_all, true_for_some, true_for_weeks, get_date, get_dates
 from coordinates import KKJxy_to_WGS84lalo
 
-#from django.contrib.gis.geos import Point # needed for transformations
-
 timezone = "Europe/Helsinki"
 
 """
@@ -87,8 +85,6 @@ class KalkatiHandler(ContentHandler):
     gtfs_files = {}
 
     def add_stop(self, attrs):
-        #point = Point(x=float(attrs['X']), y=float(attrs['Y']), srid=2393) # KKJ3
-        #point.transform(4326) # WGS84
         KKJNorthing = float(attrs['Y'])
         KKJEasting = float(attrs['X'])
         KKJLoc = {'P': KKJNorthing, 'I' : KKJEasting}

@@ -6,9 +6,37 @@
 #
 # Author:          Olli Lammi
 #
-# Version:         0.8f
+# Version:         1.0c
 #
-# Date:            20.02.2012
+# Date:            14.02.2014
+#
+# License:         MIT License (http://opensource.org/licenses/MIT)
+#
+#                  Copyright (c) 2012-2014 Olli Lammi (olammi@iki.fi)
+#
+#                  Permission is hereby granted, free of charge, to any 
+#                  person obtaining a copy of this software and associated 
+#                  documentation files (the "Software"), to deal in the 
+#                  Software without restriction, including without  
+#                  limitation the rights to use, copy, modify, merge,  
+#                  publish, distribute, sublicense, and/or sell copies of  
+#                  the Software, and to permit persons to whom the Software  
+#                  is furnished to do so, subject to the following
+#                  conditions: 
+#
+#                  The above copyright notice and this permission notice  
+#                  shall be included in all copies or substantial portions 
+#                  of the Software.
+#
+#                  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+#                  ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
+#                  TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+#                  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT 
+#                  SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+#                  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
+#                  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+#                  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+#                  DEALINGS IN THE SOFTWARE.
 #
 # Functions:       Translate
 #                  KKJxy_to_WGS84lalo
@@ -29,78 +57,38 @@
 #                  ETRSTM35FINxy_to_KKJxy
 #                  WGS84distance
 #                  WGS84bearing
+#                  WGS84travel
+#                  WGS84lalo_to_MRGS
+#                  MRGS_to_WGS84lalo
+#                  WGS84lalo_to_UTM_MGRS
 #                   
 # Description:     Coordinate system functions. 
 #
-#                  KKJ and ETRS-TM35FIN algorithms implemented by Olli Lammi
-#                  according to JHS 154.
+#                  KKJ and ETRS-TM35FIN algorithms implemented by 
+#                  Olli Lammi according to JHS 154.                  
 #                  (http://docs.jhs-suositukset.fi/jhs-suositukset/JHS154/JHS154.pdf)
 #
 #                  Google Maps functions developed based on knowledge on
-#                  multiple sites in the Internet, simplifying the algorithms
-#                  and traditional trial error method.
+#                  multiple sites in the Internet, simplifying the 
+#                  algorithms and traditional trial error method.
 # 
-#                  NOTE!: The KKJ and ETRS-TM35FIN coordinate functions are developed 
-#                  to work only with coordinates that are in the area of Finland.
+#                  NOTE!: The KKJ and ETRS-TM35FIN coordinate functions  
+#                  are developed to work only with coordinates that are in 
+#                  the area of Finland.
 #
-# Version history: ** 05.09.2005 v0.1a (Olli Lammi) **
-#                  First version. Translated partially from PHP to Python.
-#                  Original PHP code source: www.viestikallio.fi
-# 
-#                  ** 26.09.2005 v0.2a (Olli Lammi) **
-#                  Included the WGS84_to_KKJxy -conversion.
-#                  Changed all interfaces to work with degrees when
-#                  using angle values
-#                  Altered the KKJ zone info function to a
-#                  lookup dictionary (KKJ_ZONE_INFO).
-#                  Added function to calculate propable KKJ band
-#                  from KKJ longitude (KKJ_Zone_Lo).
-#                  
-#                  ** 01.10.2005 v0.3a (Olli Lammi) **
-#                  Small changes to function interfaces.
+#                  NOTE!: MGRS conversion functions do not support the
+#                  polar regions (Antarctic and North pole).
 #
-#                  ** 14.10.2005 v0.4a (Olli Lammi) **
-#                  Added support for KKJ-bands 0 and 5.
+# Version history: ** 25.10.2012 v1.0a (Olli Lammi) **
+#                  Published the rewritten version under MIT License. 
 #
-#                  ** 26.01.2007 v0.5a (Olli Lammi) **
-#                  Added prototype function to convert WGS84-coordinates
-#                  to Google Maps URL tile parameter x and y.
+#                  ** 05.12.2012 v1.0b (Olli Lammi) **
+#                  Added MGRS conversion functions. Fixed WGS84 bearing
+#                  and distance bug to support coincident points. 
 #
-#                  ** 19.02.2008 v0.6a (Olli Lammi) **
-#                  Added funcion to convert WGS84 coordinate string to
-#                  scalar coordinate value.
-#
-#                  ** 25.02.2008 v0.7a (Olli Lammi) **
-#                  Added funcion to tell approximately whether given KKJ
-#                  koordinate is in the are of Finland.
-#
-#                  ** 08.08.2008 v0.7b (Olli Lammi) **
-#                  Added utility funcion to shift KKJxy coordinate to given 
-#                  zone: KKJxy_ZoneShift
-#
-#                  ** 10.02.2010 v0.8a (Olli Lammi) **
-#                  Added functions for ETRS-TM35FINxy to and from WGS84lalo 
-#                  conversions. Added coordinate translate method according
-#                  to type.
-#
-#                  ** 05.08.2010 v0.8b (Olli Lammi) **
-#                  Increased iteration area for Lon value in KKJxy_to_KKJlalo 
-#                  function. Added functions to calculate distance in meters
-#                  and initial and final bearing between two WGS84 locations.
-#
-#                  ** 03.02.2012 v0.8c (Olli Lammi) **
-#                  Unified the interface dictionary data names. 
-#
-#                  ** 05.02.2012 v0.8d (Olli Lammi) **
-#                  Changed the KKJxy_in_Finland algorithm to more accurate
-#                  polygon. (*** Polygon still an approximation  of Finland ***) 
-#
-#                  ** 10.02.2012 v0.8e (Olli Lammi) **
-#                  Corrected YKJ transform to accept over band coordinates. 
-#
-#                  ** 20.02.2012 v0.8f (Olli Lammi) **
-#                  Completely rewrote KKJ coordinate transforms according to 
-#                  JHS154 and JHS153. 
+#                  ** 14.02.2014 v1.0c (Olli Lammi) **
+#                  Added WGS84travel function. Fixed a bug in WGS84bearing
+#                  function (returned initial bearing was wrong). 
 #
 ###########################################################################
 
@@ -114,24 +102,29 @@ import re
 ###########################################################################
 
 # Constants
+
 # Longitude0 and Center meridian of KKJ bands
 KKJ_ZONE_INFO = { 0: (18.0,  500000.0), \
-		  1: (21.0, 1500000.0), \
-		  2: (24.0, 2500000.0), \
-		  3: (27.0, 3500000.0), \
-		  4: (30.0, 4500000.0), \
-		  5: (33.0, 5500000.0), \
-		}
+                  1: (21.0, 1500000.0), \
+                  2: (24.0, 2500000.0), \
+                  3: (27.0, 3500000.0), \
+                  4: (30.0, 4500000.0), \
+                  5: (33.0, 5500000.0), \
+                }
 
 # Coordinate system type identifiers
 COORD_TYPE_YKJ = 'YKJxy'
 COORD_TYPE_KKJ = 'KKJxy'
 COORD_TYPE_WGS84 = 'WGS84lalo'
 COORD_TYPE_ETRSTM35FIN = 'ETRSTM35FINxy'
+COORD_TYPE_MGRS = 'MGRS'
+
+MGRS_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', \
+              'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 # Ellipsoids
 ELLIPSOID = {'WGS84': {'a': 6378137.0, 'b': 6356752.314245, 'f': 1.0 / 298.257223563, 'k0': 0.9996}, \
-	     'KKJ': {'a': 6378388.0, 'b': 6356911.946128, 'f': 1.0 / 297.0, 'k0': 1.0} \
+             'KKJ': {'a': 6378388.0, 'b': 6356911.946128, 'f': 1.0 / 297.0, 'k0': 1.0} \
 }
 
 # init precalculated ellipsoid parameters
@@ -155,9 +148,9 @@ for key in ELLIPSOID.keys():
 # Bursa-Wolf transform parameters for latlon coordinate system transfers
 # in 3D (JHS153)
 BW_TRANSFORM = {'KKJ_WGS84': {'dX': -96.0617, 'dY': -82.4278, 'dZ': -121.7535, 'ex': math.radians(-4.80107 / 3600.0), \
-			   'ey': math.radians(-0.34543 / 3600.0), 'ez': math.radians(1.37646 / 3600.0), 'm': 1.49640 / 1000000.0}, \
-		'WGS84_KKJ': {'dX': 96.0610, 'dY': 82.4298, 'dZ': 121.7485, 'ex': math.radians(4.80109 / 3600.0), \
-			   'ey': math.radians(0.34546 / 3600.0), 'ez': math.radians(-1.37645 / 3600.0), 'm': -1.49651 / 1000000.0} \
+                           'ey': math.radians(-0.34543 / 3600.0), 'ez': math.radians(1.37646 / 3600.0), 'm': 1.49640 / 1000000.0}, \
+                'WGS84_KKJ': {'dX': 96.0610, 'dY': 82.4298, 'dZ': 121.7485, 'ex': math.radians(4.80109 / 3600.0), \
+                           'ey': math.radians(0.34546 / 3600.0), 'ez': math.radians(-1.37645 / 3600.0), 'm': -1.49651 / 1000000.0} \
 }
 
     
@@ -168,45 +161,52 @@ BW_TRANSFORM = {'KKJ_WGS84': {'dX': -96.0617, 'dY': -82.4278, 'dZ': -121.7535, '
 ###########################################################################
 # Input:     dictionary with ['type'] is coordinate system type identifier
 #                            ['N'] is coordinate Northing / Lat
-#                            ['E'] in coordinate Easting / Lon
+#                            ['E'] is coordinate Easting / Lon
+#                            ['STR'] is coordinate string (MGRS)
 #            type identifier of the coordinate system to transform the input
 #                            coordinates to
 # Output:    dictionary with ['type'] is coordinate system type identifier
 #                            ['N'] is coordinate Northing / Lat
-#                            ['E'] in coordinate Easting / Lon
+#                            ['E'] is coordinate Easting / Lon
+#                            ['STR'] is coordinate string (MGRS) 
 ###########################################################################
 
 def Translate(coordIn, outType):
     if (coordIn['type'] == outType):
-	return coordIn
+        return coordIn
     
     # first convert all formats to WGS84
     WGS = {}
     if (coordIn['type'] == COORD_TYPE_KKJ):
-	WGS = KKJxy_to_WGS84lalo({'P': coordIn['N'], 'I': coordIn['E']})
+        WGS = KKJxy_to_WGS84lalo({'P': coordIn['N'], 'I': coordIn['E']})
     elif (coordIn['type'] == COORD_TYPE_YKJ):
-	WGS = KKJxy_to_WGS84lalo({'P': coordIn['N'], 'I': coordIn['E']}, 3)
+        WGS = KKJxy_to_WGS84lalo({'P': coordIn['N'], 'I': coordIn['E']}, 3)
     elif (coordIn['type'] == COORD_TYPE_ETRSTM35FIN):
-	WGS = ETRSTM35FINxy_to_WGS84lalo(coordIn)
+        WGS = ETRSTM35FINxy_to_WGS84lalo(coordIn)
+    elif (coordIn['type'] == COORD_TYPE_MGRS):
+        WGS = MGRS_to_WGS84lalo(coordIn['STR'])     
     elif (coordIn['type'] == COORD_TYPE_WGS84):
-	WGS['La'] = coordIn['N'] 
-	WGS['Lo'] = coordIn['E']
+        WGS['La'] = coordIn['N'] 
+        WGS['Lo'] = coordIn['E']
     else:
-	return None
+        return None
        
     # then convert from WGS84 to wanted coordinate type 
     if (outType == COORD_TYPE_WGS84):
-	return {'type': COORD_TYPE_WGS84, 'N': WGS['La'], 'E': WGS['Lo']}
+        return {'type': COORD_TYPE_WGS84, 'N': WGS['La'], 'E': WGS['Lo']}
     elif (outType == COORD_TYPE_KKJ or outType == COORD_TYPE_YKJ):
-	KKJ = WGS84lalo_to_KKJxy(WGS)
-	if (outType == COORD_TYPE_YKJ):
-	    KKJ = KKJxy_ZoneShift(KKJ, 3)
-	return {'type': outType, 'N': KKJ['P'], 'E': KKJ['I']}
+        KKJ = WGS84lalo_to_KKJxy(WGS)
+        if (outType == COORD_TYPE_YKJ):
+            KKJ = KKJxy_ZoneShift(KKJ, 3)
+        return {'type': outType, 'N': KKJ['P'], 'E': KKJ['I']}
     elif (outType == COORD_TYPE_ETRSTM35FIN):
-	ETRS = WGS84lalo_to_ETRSTM35FINxy(WGS)
-	return {'type': COORD_TYPE_ETRSTM35FIN, 'N': ETRS['N'], 'E': ETRS['E']}
+        ETRS = WGS84lalo_to_ETRSTM35FINxy(WGS)
+        return {'type': COORD_TYPE_ETRSTM35FIN, 'N': ETRS['N'], 'E': ETRS['E']}
+    elif (outType == COORD_TYPE_MGRS):
+        MGRSstr = WGS84lalo_to_MGRS(WGS)
+        return {'type': COORD_TYPE_MGRS, 'STR': MGRSstr}
     else:
-	return None
+        return None
 
 
 
@@ -315,7 +315,7 @@ def KKJ_Zone_Lo(KKJlo):
     if math.fabs(KKJlo - KKJ_ZONE_INFO[ZoneNumber][0]) <= 1.5:
       break
     ZoneNumber = ZoneNumber - 1
-	    
+            
   return ZoneNumber
 
 
@@ -455,7 +455,7 @@ def Str_to_CoordinateValue(WGSstr):
   if (mo != None):
     value = string.atof( mo.group('deg') )
     if ( mo.group('sig') == '-' ):
-	value = -value
+        value = -value
     return value
 
   # case: other
@@ -496,17 +496,17 @@ def PointInPolygon(point, polygon):
     i = 0
     j = pollen - 1
     while (i < pollen):
-	ypj = polygon[j][1]
-	ypi = polygon[i][1]
-	xpj = polygon[j][0]
-	xpi = polygon[i][0]
-	if ( (ypi <= y and y < ypj) or (ypj <= y and y < ypi) ) and \
-	   (x < (xpj - xpi) * (y - ypi) / (ypj - ypi) + xpi):
-	    c = not c
-
-	j = i
-	i = i + 1
-
+        ypj = polygon[j][1]
+        ypi = polygon[i][1]
+        xpj = polygon[j][0]
+        xpi = polygon[i][0]
+        if ( (ypi <= y and y < ypj) or (ypj <= y and y < ypi) ) and \
+           (x < (xpj - xpi) * (y - ypi) / (ypj - ypi) + xpi):
+            c = not c
+                
+        j = i
+        i = i + 1
+        
     return c
 
 def KKJxy_in_Finland(KKJ):
@@ -656,9 +656,9 @@ def lalo_to_lalo(la, lo, BW_transform, from_ellipsoid, to_ellipsoid):
   while dla > 1.0E-12 and nn < 100:          
       N = a_2 / math.sqrt(1.0 - e2 * math.pow(math.sin(la), 2.0))
       if abs(la0) < (math.pi / 4.0):
-	  h = X2Y2 / math.cos(la) - N
+          h = X2Y2 / math.cos(la) - N
       else:
-	  h = Z2 / math.sin(la) - N * (1.0 - e2)
+          h = Z2 / math.sin(la) - N * (1.0 - e2)
       nla = math.atan(Z2 / (X2Y2 * (1.0 - (N * e2) / (N + h))))
       dla = abs(nla - la)
       la = nla
@@ -701,7 +701,8 @@ def WGS84distance(WGSin1, WGSin2):
   cosU2 = math.cos(U2)
   
   lam = dLon
-  lamPrev = None
+  isFirst = 1;
+  lamPrev = 0.0
   limit = 100
   
   cosAlpha2 = 0.0
@@ -709,7 +710,8 @@ def WGS84distance(WGSin1, WGSin2):
   cosSig = 0.0
   cos2sigM = 0.0
 
-  while ((not lamPrev or abs(lam - lamPrev) > 1e-12) and limit > 0):
+  while ((isFirst or abs(lam - lamPrev) > 1e-12) and limit > 0):
+    isFirst = 0;
     lamPrev = lam;
     sinLam = math.sin(lam)
     cosLam = math.cos(lam)
@@ -730,6 +732,7 @@ def WGS84distance(WGSin1, WGSin2):
     C = Cf / 16.0 * cosAlpha2 * (4.0 + Cf * (4.0 - 3.0 * cosAlpha2))
     
     lam = dLon + (1.0 - C) * Cf * sinAlpha * (sig + C * sinSig * (cos2sigM + C * cosSig * (-1.0 + 2.0 * math.pow(cos2sigM, 2.0))))
+    limit = limit - 1
 
   if limit == 0:
     return None 
@@ -739,7 +742,7 @@ def WGS84distance(WGSin1, WGSin2):
   A = 1.0 + u2 / 16384.0 * (4096.0 + u2 * (-768.0 + u2 * (320.0 - 175.0 * u2)))
   B = u2 / 1024.0 * (256.0 + u2 * (-128.0 + u2 * (74.0 - 47.0 * u2)))
   dsig = B * sinSig * (cos2sigM + 0.25 * B * (cosSig * (-1.0 + 2.0 * math.pow(cos2sigM, 2.0)) - \
-	 1.0 / 6.0 * B * cos2sigM * (-3.0 + 4.0 * math.pow(sinSig, 2.0)) * (-3.0 + 4.0 * math.pow(cos2sigM, 2.0))))
+         1.0 / 6.0 * B * cos2sigM * (-3.0 + 4.0 * math.pow(sinSig, 2.0)) * (-3.0 + 4.0 * math.pow(cos2sigM, 2.0))))
   
   return Cb * A * (sig - dsig)
 
@@ -768,14 +771,16 @@ def WGS84bearing(WGSin1, WGSin2):
   cosU2 = math.cos(U2)
   
   lam = dLon
+  isFirst = 1
   lamPrev = None
   limit = 100
 
   sinLam = 0.0
   cosLam = 0.0
 
-  while ((not lamPrev or abs(lam - lamPrev) > 1e-12) and limit > 0):
-    lamPrev = lam;
+  while ((isFirst or abs(lam - lamPrev) > 1e-12) and limit > 0):
+    isFirst = 0
+    lamPrev = lam
     sinLam = math.sin(lam)
     cosLam = math.cos(lam)
     
@@ -795,13 +800,238 @@ def WGS84bearing(WGSin1, WGSin2):
     C = Cf / 16.0 * cosAlpha2 * (4.0 + Cf * (4.0 - 3.0 * cosAlpha2))
     
     lam = dLon + (1.0 - C) * Cf * sinAlpha * (sig + C * sinSig * (cos2sigM + C * cosSig * (-1.0 + 2.0 * math.pow(cos2sigM, 2.0))))
+    limit = limit - 1
 
   if limit == 0:
     return None 
   
-  al1 = math.degrees(math.atan2(cosU2 * sinLam, cosU2 * sinU2 - sinU1 * cosU2 * cosLam))
+  al1 = math.degrees(math.atan2(cosU2 * sinLam, cosU1 * sinU2 - sinU1 * cosU2 * cosLam))
   al2 = math.degrees(math.atan2(cosU1 * sinLam, -sinU1 * cosU2 + cosU1 * sinU2 * cosLam))
 
   return (al1, al2)
 
+        
+###########################################################################
+# Function:  WGS84distance
+###########################################################################
+# Input:     dictionary with ['La'] is latitude in degrees (WGS84)
+#                            ['Lo'] is longitude in degrees (WGS84)
+#            bearing from given point
+#            distance from given point
+# Output:    dictionary with ['La'] and ['Lo'] as WGS84 coordinates of
+#            the final point
+###########################################################################
 
+def WGS84travel(WGSin, bearing, distance):
+  Ca = ELLIPSOID['WGS84']['a']
+  Cb = ELLIPSOID['WGS84']['b']
+  Cf = ELLIPSOID['WGS84']['f']
+
+  s = distance
+  alpha1 = math.radians(bearing)
+  sinAlpha1 = math.sin(alpha1)
+  cosAlpha1 = math.cos(alpha1)
+
+  tanU1 = (1.0 - Cf) * math.tan(math.radians(WGSin['La']))
+  cosU1 = 1.0 / math.sqrt(1.0 + tanU1 * tanU1)
+  sinU1 = tanU1 * cosU1
+  sigma1 = math.atan2(tanU1, cosAlpha1)
+  sinAlpha = cosU1 * sinAlpha1
+  cosSqAlpha = 1.0 - sinAlpha * sinAlpha
+  uSq = cosSqAlpha * (Ca * Ca - Cb * Cb) / (Cb * Cb)
+  A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)))
+  B = uSq / 1024.0 * (256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)))
+
+  sigma = s / (Cb * A)
+  sigmaPrev = 2.0 * math.pi
+  while abs(sigma - sigmaPrev) > 1e-12:
+    cos2SigmaM = math.cos(2.0 * sigma1 + sigma)
+    sinSigma = math.sin(sigma)
+    cosSigma = math.cos(sigma)
+    deltaSigma = B * sinSigma * (cos2SigmaM + B / 4.0 * (cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM) - B / 6.0 * cos2SigmaM * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0 + 4.0 * cos2SigmaM * cos2SigmaM)))
+    sigmaPrev = sigma
+    sigma = s / (Cb * A) + deltaSigma
+ 
+  sinSigma = math.sin(sigma)
+  cosSigma = math.cos(sigma)
+  cos2SigmaM = math.cos(2.0 * sigma1 + sigma)
+  tmp1 = sinU1 * sinSigma - cosU1 * cosSigma * cosAlpha1
+  lat2 = math.atan2(sinU1 * cosSigma + cosU1 * sinSigma * cosAlpha1, (1.0 - Cf) * math.sqrt(sinAlpha * sinAlpha + tmp1 * tmp1))
+  lam = math.atan2(sinSigma * sinAlpha1, cosU1 * cosSigma - sinU1 * sinSigma * cosAlpha1)
+  C = Cf / 16.0 * cosSqAlpha * (4.0 + Cf * (4.0 - 3.0 * cosSqAlpha))
+  L = lam - (1.0 - C) * Cf * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)))
+
+  lat2 = math.degrees(lat2)
+  lon2 = WGSin['Lo'] + math.degrees(L)
+  lon2 = ((lon2 + 3 * 180.0) % 360.0) - 180.0
+
+  return {'La': lat2, 'Lo': lon2}
+
+
+
+###########################################################################
+# Function:  WGS84lalo_to_MGRS
+###########################################################################
+# Input:     dictionary with ['La'] is latitude in degrees (WGS84)
+#                            ['Lo'] is longitude in degrees (WGS84)
+#            output precision in meters (1, 10, 100, 1000, ..., 100000)
+#                            default is 1
+# Output:    string containing MGRS coordinates 
+###########################################################################
+
+def WGS84lalo_to_MGRS(WGS, precision = 1):
+  if WGS['La'] < -80.0: 
+      return 'Antarctic not supported'
+  if WGS['La'] >= 84.0:
+      return 'North pole not supported'
+
+  precisions = {1: '%05d', 10: '%04d', 100: '%03d', 1000: '%02d', 10000:'%01d', 100000: ''}
+  if not precision in precisions.keys():
+      return 'Unknown MGRS precision'
+
+  xycoords = WGS84lalo_to_UTM_MGRS(WGS)
+
+  mgrsx = int(math.floor(xycoords['E'] % 100000))
+  mgrsy = int(math.floor(xycoords['N'] % 100000))
+  mgrsx = mgrsx / precision;
+  mgrsy = mgrsy / precision;
+
+  formatstr = "%s%s%s"
+  if precision < 100000:
+      formatstr = formatstr + ' ' + precisions[precision]
+      formatstr = formatstr + ' ' + precisions[precision]
+      result = formatstr % (xycoords['zone'], xycoords['band'], xycoords['grid'], mgrsx, mgrsy)
+  else:
+      result = formatstr % (xycoords['zone'], xycoords['band'], xycoords['grid'])
+
+  return result
+
+
+
+###########################################################################
+# Function:  MGRS_to_WGS84lalo
+###########################################################################
+# Input:     string containing MGRS coordinates
+# Output:    lower left coordinate of the given MSRS grid position in
+#            dictionary with ['La'] is latitude in degrees (WGS84)
+#                            ['Lo'] is longitude in degrees (WGS84) 
+###########################################################################
+
+def MGRS_to_WGS84lalo(MGRS):
+    #eliminate white space
+    MGRS = string.upper(string.strip(string.replace(MGRS, ' ', '')))
+
+    # NNXXXN(0:10)
+    mgrscs = string.join(MGRS_CHARS, '')
+    regexp1 = '^(?P<zone>\d+)(?P<band>[' + mgrscs + '])(?P<gridcol>[' + mgrscs + '])(?P<gridrow>[' + mgrscs + '])(?P<coords>\d*)$'
+    mo = re.match(regexp1, MGRS)
+    if (mo == None):
+        return {'La': None, 'Lo': None}
+
+    try:
+        zone = int(mo.group('zone')) 
+        band = MGRS_CHARS.index(mo.group('band'))
+        gridcol = MGRS_CHARS.index(mo.group('gridcol'))
+        gridrow = MGRS_CHARS.index(mo.group('gridrow'))
+    except:
+        return {'La': None, 'Lo': None}
+
+    coordstr = mo.group('coords')    
+    if len(coordstr) not in [0,2,4,6,8,10]:
+        return {'La': None, 'Lo': None}
+    coordlen = len(coordstr) / 2
+    strx = coordstr[0:coordlen]
+    stry = coordstr[coordlen:]
+    strx = strx + ((5-coordlen) * '0')
+    stry = stry + ((5-coordlen) * '0')
+    mgrsx = float(int(strx))
+    mgrsy = float(int(stry))
+
+    gridcol0 = ((zone % 3) - 1) * 8
+    if gridcol < gridcol0:
+        gridcol = gridcol + 24
+    gridcol = (gridcol - gridcol0) % 24    
+    utme = mgrsx + 100000.0 + gridcol * 100000.0
+    
+    lat = 8.0 * (band - 2) - 80.0
+    lon0 = ((zone - 1) * 6.0 + 3.0) - 180.0  
+    xyc = lalo_to_xy(lat, lon0, lon0, 500000.0, ELLIPSOID['WGS84'])
+    utmn0 = xyc['N'];
+    gridrow0 = calculateMGRSGridRow(zone, utmn0)
+
+    if gridrow < gridrow0:
+        gridrow = gridrow + 20
+    gridrow = (gridrow - gridrow0) % 20
+    utmn = 100000.0 * math.floor(utmn0 / 100000.0) + (gridrow * 100000.0) + mgrsy
+        
+    return xy_to_lalo(utme, utmn, lon0, 500000.0, ELLIPSOID['WGS84'])
+
+
+###########################################################################
+# Function:  WGS84lalo_to_UTM_MGRS
+###########################################################################
+# Input:     dictionary with ['La'] is latitude in degrees (WGS84)
+#                            ['Lo'] is longitude in degrees (WGS84)
+# Output:    dictionary with ['E'] is UTM easting
+#                            ['N'] is UTM northing
+#                            ['zone'] is UTM zone
+#                            ['band'] is MGRS band
+#                            ['grid'] is MGRS grid
+###########################################################################
+
+def WGS84lalo_to_UTM_MGRS(WGS):
+    zone = int(math.floor( (WGS['Lo'] + 180.0) / 6.0 + 1 ))
+    band = int(math.floor( (WGS['La'] + 80.0) / 8.0 ) + 2)
+    if WGS['La'] >= 72.0 and WGS['La'] < 84.0:
+        band = 21
+
+    # in Norway 32V is extended 3.0 degrees to west
+    if band == 19 and zone == 31:
+        if WGS['Lo'] >= 3.0:
+            zone = 32
+    # in Svalbard remove 32X, 34X and 36X
+    elif band == 21 and zone >= 31 and zone <= 37:
+        if zone == 32:
+            if WGS['Lo'] >= 9.0:
+                zone = 33
+            else:
+                zone = 31
+        elif zone == 34:
+            if WGS['Lo'] >= 21.0:
+                zone = 35
+            else:
+                zone = 33
+        elif zone == 36:
+            if WGS['Lo'] >= 33.0:
+                zone = 37
+            else:
+                zone = 35
+
+    lon0 = ((zone - 1) * 6.0 + 3.0) - 180.0
+    xyc = lalo_to_xy(WGS['La'], WGS['Lo'], lon0, 500000.0, ELLIPSOID['WGS84'])
+
+    if xyc['N'] < 0:
+        xyc['N'] = xyc['N'] + 10000000.0
+
+    gridcol = ((zone % 3) - 1) * 8
+    gridcol = gridcol + int( math.floor( ((xyc['E'] - 100000.0) / 100000.0) ))
+    gridcol = gridcol % 24
+
+    gridrow = calculateMGRSGridRow(zone, xyc['N'])
+
+    xyc['zone'] = zone;
+    xyc['band'] = MGRS_CHARS[band]
+    xyc['grid'] = MGRS_CHARS[gridcol] + MGRS_CHARS[gridrow]  
+
+    return xyc
+
+def calculateMGRSGridRow(zone, utmN):
+    if zone % 2 > 0:
+        gridrow = int( math.floor((utmN / 100000.0) % 20) )
+    else:
+        gridrow = int( math.floor((utmN / 100000.0 + 5.0) % 20) )
+
+    if gridrow < 0:
+        gridrow = gridrow + 20
+    
+    return gridrow
